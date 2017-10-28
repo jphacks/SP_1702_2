@@ -4,6 +4,10 @@ from collections import OrderedDict
 import requests
 from django.http import HttpResponse
 from requests_oauthlib import OAuth1Session
+
+import termextract.mecab
+import termextract.core
+import collections
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 
@@ -58,27 +62,25 @@ def get_twitter(request):  # twitter取得
 
             word = ""
             json_responses = json.loads(response.text)
+            print(json_responses)
             for x in range(0, len(json_responses["word_list"][0])):
-                for y in range(0, len(json_responses["word_list"][0][x])):
-                    if x == 0:
-                        word = word + json_responses["word_list"][0][x][y]
-                    else:
-                        word = " " + word + json_responses["word_list"][0][x][y]
-
-            word_list.append(word)
-            print(json_responses["word_list"][0][1][0])
-
+                word = json_responses["word_list"][0][x][0]
+                word_list.append(word)
 
     else:
         pass
 
-    length = len(res)
+    frequency = termextract.mecab.cmp_noun_dict(word_list)
+    LR = termextract.core.score_lr(frequency,
+                                   ignore_words=termextract.mecab.IGNORE_WORDS,
+                                   lr_mode=1, average_rate=1
+                                   )
+    term_imp = termextract.core.term_importance(frequency, LR)
 
-    tfidf_vectorizer = TfidfVectorizer(input='filename', max_df=0.5, min_df=1, max_features=3000, norm='l2')
-    tfidf_vect = TfidfVectorizer()
-    X_tfidf = tfidf_vect.fit_transform(res)
-    #print(word_list)
-
+    # 重要度が高い順に並べ替えて出力
+    data_collection = collections.Counter(term_imp)
+    for cmp_noun, value in data_collection.most_common():
+        print(termextract.core.modify_agglutinative_lang(cmp_noun), value, sep="\t")
     data = OrderedDict([('tweet', res)])
 
     return render_json_response(request, data)
