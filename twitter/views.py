@@ -1,8 +1,11 @@
-from django.shortcuts import render
 import json
-from django.http import HttpResponse
 from collections import OrderedDict
+
+import requests
+from django.http import HttpResponse
 from requests_oauthlib import OAuth1Session
+from sklearn.feature_extraction.text import TfidfVectorizer
+
 
 # Create your views here.
 
@@ -20,28 +23,62 @@ def render_json_response(request, data, status=None):
         response = HttpResponse(json_str, content_type='application/json; charset=UTF-8', status=status)
     return response
 
-def book_list(request):
-    """書籍と感想のJSONを返す"""
-    twitter = []
 
-    for book in Book.objects.all().order_by('id'):
+def get_twitter(request):  # twitter取得
+    res = []
+    word_list = []
+    CK = 'TddC18rLgkTpINdoTSEXbIdJY'  # Consumer Key
+    CS = 'mNaw4USUSbe8TKt1lnfKvLzGVpYRAnXXJTgoTZlQnRtFJfTHQl'  # Consumer Secret
+    AT = '924084285719568384-hTXQsl5VJSjXe6PHRs2fN9kXK07CxzT'  # Access Token
+    AS = 'sjy93O0EcCXlAQWdl0Tv6BPPTMAw6crNY63yA0dhi2u7D'  # Accesss Token Secert
 
-        impressions = []
-        for impression in book.impressions.order_by('id'):
-            impression_dict = OrderedDict([
-                ('id', impression.id),
-                ('comment', impression.comment),
-            ])
-            impressions.append(impression_dict)
+    params = {
+        "count": "200"
+    }
 
-        book_dict = OrderedDict([
-            ('id', book.id),
-            ('name', book.name),
-            ('publisher', book.publisher),
-            ('page', book.page),
-            ('impressions', impressions)
-        ])
-        twitter.append(book_dict)
+    # タイムライン取得用のURL
+    url = "https://api.twitter.com/1.1/statuses/home_timeline.json"
 
-    data = OrderedDict([ ('books', books) ])
+    twitter = OAuth1Session(CK, CS, AT, AS)
+    req = twitter.get(url, params=params)
+
+    if req.status_code == 200:
+        # レスポンスはJSON形式なので parse する
+        timeline = json.loads(req.text)
+        # 各ツイートの本文を表示
+        for tweet in timeline:
+            res.append(tweet["text"])
+
+            # 形態素解析
+            response = requests.post(
+                "https://labs.goo.ne.jp/api/morph",
+                json.dumps({"app_id": "01b8ea01ad55394c6e987fc3a84332dc5848e12a3b0b57c3dba01eb4b0b7b9ac",
+                            "sentence": tweet["text"]}),
+                headers={'Content-Type': 'application/json'})
+
+            word = ""
+            json_responses = json.loads(response.text)
+            for x in range(0, len(json_responses["word_list"][0])):
+                for y in range(0, len(json_responses["word_list"][0][x])):
+                    if x == 0:
+                        word = word + json_responses["word_list"][0][x][y]
+                    else:
+                        word = " " + word + json_responses["word_list"][0][x][y]
+
+            word_list.append(word)
+            print(json_responses["word_list"][0][1][0])
+
+
+    else:
+        pass
+
+    length = len(res)
+
+    tfidf_vectorizer = TfidfVectorizer(input='filename', max_df=0.5, min_df=1, max_features=3000, norm='l2')
+    tfidf_vect = TfidfVectorizer()
+    X_tfidf = tfidf_vect.fit_transform(res)
+    #print(word_list)
+
+    data = OrderedDict([('tweet', res)])
+
     return render_json_response(request, data)
