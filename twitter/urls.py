@@ -3,5 +3,5 @@ from twitter import views
 
 urlpatterns = [
     # 書籍
-    url(r'^v1/books/$', views.get_twitter, name='twitter'),     # 一覧
+    url(r'^v1/tweet/$', views.get_twitter, name='twitter'),     # 一覧
 ]
