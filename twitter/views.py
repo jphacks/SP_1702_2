@@ -28,7 +28,9 @@ def get_twitter(request):# twitter取得
     AT = '924084285719568384-hTXQsl5VJSjXe6PHRs2fN9kXK07CxzT'  # Access Token
     AS = 'sjy93O0EcCXlAQWdl0Tv6BPPTMAw6crNY63yA0dhi2u7D'  # Accesss Token Secert
 
-    params = {}
+    params = {
+        "count" : "200"
+    }
 
     # タイムライン取得用のURL
     url = "https://api.twitter.com/1.1/statuses/home_timeline.json"
@@ -46,6 +48,7 @@ def get_twitter(request):# twitter取得
 
     else:
         pass
+
 
     tfidf_vect = TfidfVectorizer()
     X_tfidf = tfidf_vect.fit_transform(response)
