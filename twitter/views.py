@@ -3,6 +3,7 @@ import json
 from django.http import HttpResponse
 from collections import OrderedDict
 from requests_oauthlib import OAuth1Session
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 # Create your views here.
 
@@ -20,28 +21,35 @@ def render_json_response(request, data, status=None):
         response = HttpResponse(json_str, content_type='application/json; charset=UTF-8', status=status)
     return response
 
-def book_list(request):
-    """書籍と感想のJSONを返す"""
-    twitter = []
+def get_twitter(request):# twitter取得
+    response = []
+    CK = 'TddC18rLgkTpINdoTSEXbIdJY'  # Consumer Key
+    CS = 'mNaw4USUSbe8TKt1lnfKvLzGVpYRAnXXJTgoTZlQnRtFJfTHQl'  # Consumer Secret
+    AT = '924084285719568384-hTXQsl5VJSjXe6PHRs2fN9kXK07CxzT'  # Access Token
+    AS = 'sjy93O0EcCXlAQWdl0Tv6BPPTMAw6crNY63yA0dhi2u7D'  # Accesss Token Secert
 
-    for book in Book.objects.all().order_by('id'):
+    params = {}
 
-        impressions = []
-        for impression in book.impressions.order_by('id'):
-            impression_dict = OrderedDict([
-                ('id', impression.id),
-                ('comment', impression.comment),
-            ])
-            impressions.append(impression_dict)
+    # タイムライン取得用のURL
+    url = "https://api.twitter.com/1.1/statuses/home_timeline.json"
 
-        book_dict = OrderedDict([
-            ('id', book.id),
-            ('name', book.name),
-            ('publisher', book.publisher),
-            ('page', book.page),
-            ('impressions', impressions)
-        ])
-        twitter.append(book_dict)
+    twitter = OAuth1Session(CK, CS, AT, AS)
+    req = twitter.get(url, params=params)
 
-    data = OrderedDict([ ('books', books) ])
+    if req.status_code == 200:
+        # レスポンスはJSON形式なので parse する
+        timeline = json.loads(req.text)
+        # 各ツイートの本文を表示
+        for tweet in timeline:
+            print(tweet["text"])
+            response.append(tweet["text"])
+
+    else:
+        pass
+
+    tfidf_vect = TfidfVectorizer()
+    X_tfidf = tfidf_vect.fit_transform(response)
+    print(X_tfidf)
+
+    data = OrderedDict([ ('tweet', response) ])
     return render_json_response(request, data)
