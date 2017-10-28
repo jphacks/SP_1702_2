@@ -29,6 +29,7 @@ def render_json_response(request, data, status=None):
 
 
 def get_twitter(request):  # twitter取得
+    print(request)
     res = []
     word_list = []
     CK = 'TddC18rLgkTpINdoTSEXbIdJY'  # Consumer Key
@@ -45,6 +46,7 @@ def get_twitter(request):  # twitter取得
 
     twitter = OAuth1Session(CK, CS, AT, AS)
     req = twitter.get(url, params=params)
+
 
     if req.status_code == 200:
         # レスポンスはJSON形式なので parse する
