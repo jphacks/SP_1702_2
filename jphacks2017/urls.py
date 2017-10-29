@@ -18,7 +18,6 @@ from django.contrib import admin
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^twitter/', include('twitter.urls', namespace='twitter')),
     url(r'^food/', include('food.urls', namespace='food')),
 
 ]

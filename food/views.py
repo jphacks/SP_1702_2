@@ -4,8 +4,6 @@ import json
 from collections import OrderedDict
 
 import requests
-import termextract.core
-import termextract.mecab
 from django.http import HttpResponse
 
 
