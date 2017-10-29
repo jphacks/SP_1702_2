@@ -1,1 +1,1 @@
-web: gunicorn myDjango.wsgi --log-file -
+web: gunicorn jphacks2017.wsgi --log-file -
