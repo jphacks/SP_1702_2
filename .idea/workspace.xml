@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="631b9ed1-983b-45c1-b169-c94ee0af9fdc" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/jphacks2017/settings.py" afterPath="$PROJECT_DIR$/jphacks2017/settings.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/jphacks2017/wsgi.py" afterPath="$PROJECT_DIR$/jphacks2017/wsgi.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
