@@ -35,6 +35,6 @@ def get_food(request):  # twitter取得
     # タイムライン取得用のURL
     data = response.json()
 
-    data = OrderedDict([('shop', data["rest"][0]["name"])])
+    data = OrderedDict([('shop_name', data["rest"][0]["name"])])
 
     return render_json_response(request, data)
